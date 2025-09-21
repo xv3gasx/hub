@@ -8,7 +8,7 @@ local Window = WindUI:CreateWindow({
 })
 local Tab = Window:Tab({
     Title = "Esp",
-    Icon = "box", -- optional
+    Icon = "app-window", -- optional
     Locked = false,
 })
 WindUI:SetNotificationLower(true)
@@ -16,5 +16,5 @@ WindUI:Notify({
     Title = "Menu Load Successful",
     Content = "Good Game ^^",
     Duration = 3, -- 3 seconds
-    Icon = "app-window",
+    Icon = "box",
 })
