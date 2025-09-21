@@ -1,20 +1,20 @@
 local WindUI = loadstring(game:HttpGet("https://github.com/Footagesus/WindUI/releases/latest/download/main.lua"))()
 local Window = WindUI:CreateWindow({
-    Title = "Mm2 Script",
-    Author = "x.v3gas.x",
-    Theme = "Dark",
-    Size = UDim2.fromOffset(660, 430),
-    Folder = "x.v3gas.x",
+    Title = "Mm2 Script",
+    Author = "x.v3gas.x",
+    Theme = "Dark",
+    Size = UDim2.fromOffset(660, 430),
+    Folder = "x.v3gas.x",
 })
 local Tab = Window:Tab({
-    Title = "Esp",
-    Icon = "server", -- optional
-    Locked = false,
+    Title = "Esp",
+    Icon = "box", -- optional
+    Locked = false,
 })
 WindUI:SetNotificationLower(true)
 WindUI:Notify({
-    Title = "Menu Load Successful",
-    Content = "Good Game ^^",
-    Duration = 3, -- 3 seconds
-    Icon = "app-window",
+    Title = "Menu Load Successful",
+    Content = "Good Game ^^",
+    Duration = 3, -- 3 seconds
+    Icon = "app-window",
 })
