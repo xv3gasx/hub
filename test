@@ -1,10 +1,10 @@
 local WindUI = loadstring(game:HttpGet("https://github.com/Footagesus/WindUI/releases/latest/download/main.lua"))()
 
 WindUI:Notify({
-    Title = "Notification Title",
-    Content = "Notification Content example!",
+    Title = "Load Successful ^^",
+    Content = "Join Discord For More Scripts/Updates",
     Duration = 3, -- 3 seconds
-    Icon = "bird",
+    Icon = "swords",
 })
 
 local Window = WindUI:CreateWindow({
