@@ -1,4 +1,4 @@
--- WindUI loader (must be first)
+bu-- WindUI loader (must be first)
 local ok, WindUI = pcall(function()
     return loadstring(game:HttpGet("https://github.com/Footagesus/WindUI/releases/latest/download/main.lua"))()
 end)
@@ -441,7 +441,7 @@ Local_Tab:Toggle({Title="Infinite Jump", Default=false, Callback=function(state)
 Local_Tab:Toggle({Title="Noclip", Default=false, Callback=function(state) _G.NoclipEnabled = state end})
 
 local Players = game:GetService("Players")
-local Dropdown = playerList
+local Dropdown = a
 
 local function Update()
     local t = {}
@@ -454,6 +454,5 @@ end
 Players.PlayerAdded:Connect(Update)
 Players.PlayerRemoving:Connect(Update)
 Update()
-
 -- finalize: ensure local player esp not created
 destroyPlayerESP(LocalPlayer)
