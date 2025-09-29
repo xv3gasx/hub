@@ -441,17 +441,16 @@ Local_Tab:Toggle({Title="Infinite Jump", Default=false, Callback=function(state)
 Local_Tab:Toggle({Title="Noclip", Default=false, Callback=function(state) _G.NoclipEnabled = state end})
 
 -- keep player list in sync automatically
-Players.PlayerAdded:Connect(function()
+Players.PlayerAdded:Connect(function(player)
     updatePlayerList()
     pcall(function() PlayerDropdown:SetValues(playerList) end)
+    createPlayerESP(player) -- yeni gelen oyuncuya ESP hemen ekle
 end)
-Players.PlayerRemoving:Connect(function()
+
+Players.PlayerRemoving:Connect(function(player)
     updatePlayerList()
     pcall(function() PlayerDropdown:SetValues(playerList) end)
-    -- also cleanup ESP entry if any
-    for p,_ in pairs(ESP) do
-        if not Players:FindFirstChild(p.Name) then destroyPlayerESP(p) end
-    end
+    destroyPlayerESP(player) -- çıkan oyuncunun ESP'sini temizle
 end)
 
 -- finalize: ensure local player esp not created
