@@ -440,18 +440,20 @@ Local_Tab:Slider({
 Local_Tab:Toggle({Title="Infinite Jump", Default=false, Callback=function(state) _G.InfiniteJumpEnabled = state end})
 Local_Tab:Toggle({Title="Noclip", Default=false, Callback=function(state) _G.NoclipEnabled = state end})
 
--- keep player list in sync automatically
-Players.PlayerAdded:Connect(function(player)
-    updatePlayerList()
-    pcall(function() PlayerDropdown:SetValues(playerList) end)
-    createPlayerESP(player) -- yeni gelen oyuncuya ESP hemen ekle
-end)
+local Players = game:GetService("Players")
+local Dropdown = -- your dropdown
 
-Players.PlayerRemoving:Connect(function(player)
-    updatePlayerList()
-    pcall(function() PlayerDropdown:SetValues(playerList) end)
-    destroyPlayerESP(player) -- çıkan oyuncunun ESP'sini temizle
-end)
+local function Update()
+    local t = {}
+    for _,p in next, Players:GetPlayers() do
+        table.insert(t,p.Name)
+    end
+    Dropdown:Refresh(t)
+end
+
+Players.PlayerAdded:Connect(Update)
+Players.PlayerRemoving:Connect(Update)
+Update()
 
 -- finalize: ensure local player esp not created
 destroyPlayerESP(LocalPlayer)
