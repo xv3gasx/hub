@@ -1,14 +1,11 @@
--- WindUI loader (must be first)
+q-- WindUI Loader
 local ok, WindUI = pcall(function()
     return loadstring(game:HttpGet("https://github.com/Footagesus/WindUI/releases/latest/download/main.lua"))()
 end)
-if not ok or not WindUI then
-    warn("WindUI load failed")
-    return
-end
+if not ok or not WindUI then return warn("WindUI load failed") end
 
 WindUI:Notify({
-    Title = "Load Successful ^^",
+    Title = "Load Successful",
     Content = "Join Discord For More Scripts/Updates",
     Duration = 3,
     Icon = "swords",
@@ -47,14 +44,14 @@ local UserInputService = game:GetService("UserInputService")
 local Camera = workspace.CurrentCamera
 local LocalPlayer = Players.LocalPlayer
 
--- Globals / defaults
+-- Globals
 _G.ESPEnabled = false
 _G.GunESPEnabled = false
 _G.WalkSpeedValue = 16
 _G.InfiniteJumpEnabled = false
 _G.NoclipEnabled = false
 
--- Utilities
+-- Utility
 local function safeNewDrawing(class, props)
     local ok, obj = pcall(function() return Drawing.new(class) end)
     if not ok or not obj then return nil end
@@ -67,23 +64,14 @@ local function safeNewDrawing(class, props)
 end
 
 local function worldToScreen(pos)
-    local success, sp, onScreen = pcall(function()
-        return Camera:WorldToViewportPoint(pos)
-    end)
-    if not success then return Vector2.new(0,0), false end
+    local ok, sp, onScreen = pcall(function() return Camera:WorldToViewportPoint(pos) end)
+    if not ok then return Vector2.new(0,0), false end
     return Vector2.new(sp.X, sp.Y), onScreen
 end
 
--- Colors
-local ROLE_COLORS = {
-    Murderer = Color3.fromRGB(255,0,0),
-    Sheriff  = Color3.fromRGB(0,0,255),
-    Innocent = Color3.fromRGB(0,255,0)
-}
+local ROLE_COLORS = { Murderer=Color3.fromRGB(255,0,0), Sheriff=Color3.fromRGB(0,0,255), Innocent=Color3.fromRGB(0,255,0) }
 
--- detect role (robust)
 local function detectRole(player)
-    if not player then return "Innocent" end
     local role = "Innocent"
     local backpack = player:FindFirstChild("Backpack")
     if backpack then
@@ -92,55 +80,47 @@ local function detectRole(player)
     end
     local char = player.Character
     if char then
-        for _, c in pairs(char:GetChildren()) do
-            if c:IsA("Tool") then
-                if c.Name == "Knife" then role = "Murderer"
-                elseif c.Name == "Gun" then role = "Sheriff" end
+        for _, tool in pairs(char:GetChildren()) do
+            if tool:IsA("Tool") then
+                if tool.Name=="Knife" then role="Murderer"
+                elseif tool.Name=="Gun" then role="Sheriff" end
             end
         end
     end
     return role
 end
 
--- ESP storage
+-- ESP
 local ESP = {}
-
 local function createPlayerESP(player)
-    if not player or player == LocalPlayer or ESP[player] then return end
-    local line = safeNewDrawing("Line", {Thickness = 3, Visible = false})
-    local box  = safeNewDrawing("Square", {Thickness = 1, Filled = false, Visible = false})
-    local nameTag = safeNewDrawing("Text", {Size = 16, Center = true, Outline = true, Visible = false, Text = player.Name})
+    if player == LocalPlayer or ESP[player] then return end
+    local line = safeNewDrawing("Line",{Thickness=3,Visible=false})
+    local box  = safeNewDrawing("Square",{Thickness=1,Filled=false,Visible=false})
+    local nameTag = safeNewDrawing("Text",{Size=16,Center=true,Outline=true,Visible=false,Text=player.Name})
     local highlight = Instance.new("Highlight")
     highlight.Name = "ESP_Highlight"
     highlight.FillTransparency = 0
     highlight.OutlineTransparency = 0.5
     highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
     highlight.Enabled = false
-
-    ESP[player] = { Line = line, Box = box, NameTag = nameTag, Highlight = highlight }
-
-    -- attach highlight when character appears
+    ESP[player] = {Line=line, Box=box, NameTag=nameTag, Highlight=highlight}
     player.CharacterAdded:Connect(function(char)
-        pcall(function()
-            highlight.Parent = char
-            highlight.Adornee = char
-        end)
+        highlight.Parent = char
+        highlight.Adornee = char
     end)
     if player.Character then
-        pcall(function()
-            highlight.Parent = player.Character
-            highlight.Adornee = player.Character
-        end)
+        highlight.Parent = player.Character
+        highlight.Adornee = player.Character
     end
 end
 
 local function destroyPlayerESP(player)
     local data = ESP[player]
     if not data then return end
-    pcall(function() if data.Line then data.Line:Remove() end end)
-    pcall(function() if data.Box then data.Box:Remove() end end)
-    pcall(function() if data.NameTag then data.NameTag:Remove() end end)
-    pcall(function() if data.Highlight then data.Highlight:Destroy() end end)
+    if data.Line then data.Line:Remove() end
+    if data.Box then data.Box:Remove() end
+    if data.NameTag then data.NameTag:Remove() end
+    if data.Highlight then data.Highlight:Destroy() end
     ESP[player] = nil
 end
 
@@ -148,34 +128,25 @@ Players.PlayerAdded:Connect(createPlayerESP)
 Players.PlayerRemoving:Connect(destroyPlayerESP)
 for _,p in pairs(Players:GetPlayers()) do createPlayerESP(p) end
 
--- Gun ESP (drawings)
-local gunLine = safeNewDrawing("Line", {Thickness = 3, Visible = false})
-local gunBox  = safeNewDrawing("Square", {Thickness = 1, Filled = false, Visible = false})
+-- Gun ESP
+local gunLine = safeNewDrawing("Line",{Thickness=3,Visible=false})
+local gunBox  = safeNewDrawing("Square",{Thickness=1,Filled=false,Visible=false})
 local currentGun = nil
-
-local function findGunDrop()
-    for _, obj in pairs(workspace:GetDescendants()) do
-        if obj and obj:IsA("BasePart") and obj.Name == "GunDrop" then
-            return obj
-        end
-    end
-    return nil
-end
 
 task.spawn(function()
     while true do
         currentGun = nil
-        pcall(function() currentGun = findGunDrop() end)
+        for _, obj in pairs(workspace:GetDescendants()) do
+            if obj:IsA("BasePart") and obj.Name=="GunDrop" then currentGun=obj break end
+        end
         task.wait(0.5)
     end
 end)
 
--- Teleports helpers
+-- Teleports
 local function teleportToGun()
     local hrp = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-    if hrp and currentGun and currentGun:IsA("BasePart") then
-        pcall(function() hrp.CFrame = currentGun.CFrame + Vector3.new(0,3,0) end)
-    end
+    if hrp and currentGun then hrp.CFrame = currentGun.CFrame + Vector3.new(0,3,0) end
 end
 
 local function teleportBehind(target)
@@ -183,276 +154,119 @@ local function teleportBehind(target)
     local hrp = target.Character:FindFirstChild("HumanoidRootPart")
     local myHRP = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
     if hrp and myHRP then
-        local back = hrp.Position - (hrp.CFrame.LookVector * 8)
-        pcall(function() myHRP.CFrame = CFrame.new(back, hrp.Position) end)
+        myHRP.CFrame = CFrame.new(hrp.Position - hrp.CFrame.LookVector*8, hrp.Position)
     end
 end
 
 local function getSheriff()
     for _, p in pairs(Players:GetPlayers()) do
         if p ~= LocalPlayer then
-            local ok = pcall(function()
-                if (p.Backpack and p.Backpack:FindFirstChild("Gun")) or (p.Character and p.Character:FindFirstChild("Gun")) then
-                    error("FOUND")
-                end
-            end)
-            if not ok then return p end
+            if (p.Backpack:FindFirstChild("Gun")) or (p.Character and p.Character:FindFirstChild("Gun")) then return p end
         end
     end
-    return nil
 end
 
 local function getMurderer()
     for _, p in pairs(Players:GetPlayers()) do
         if p ~= LocalPlayer then
-            local ok = pcall(function()
-                if (p.Backpack and p.Backpack:FindFirstChild("Knife")) or (p.Character and p.Character:FindFirstChild("Knife")) then
-                    error("FOUND")
-                end
-            end)
-            if not ok then return p end
+            if (p.Backpack:FindFirstChild("Knife")) or (p.Character and p.Character:FindFirstChild("Knife")) then return p end
         end
     end
-    return nil
 end
 
--- WalkSpeed optimized: only set when changed or on spawn
+-- WalkSpeed
 local function setWalkSpeed()
     local char = LocalPlayer.Character
     if not char then return end
     local hum = char:FindFirstChildOfClass("Humanoid")
-    if hum and hum.WalkSpeed ~= _G.WalkSpeedValue then
-        pcall(function() hum.WalkSpeed = _G.WalkSpeedValue end)
-    end
+    if hum and hum.WalkSpeed ~= _G.WalkSpeedValue then hum.WalkSpeed=_G.WalkSpeedValue end
 end
-LocalPlayer.CharacterAdded:Connect(function()
-    task.wait(0.5)
-    setWalkSpeed()
-end)
+LocalPlayer.CharacterAdded:Connect(function() task.wait(0.5) setWalkSpeed() end)
 if LocalPlayer.Character then setWalkSpeed() end
 
 -- Infinite Jump
 UserInputService.JumpRequest:Connect(function()
     if _G.InfiniteJumpEnabled then
-        local char = LocalPlayer.Character
-        local hum = char and char:FindFirstChildOfClass("Humanoid")
-        if hum then
-            pcall(function() hum:ChangeState(Enum.HumanoidStateType.Jumping) end)
-        end
+        local hum = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+        if hum then hum:ChangeState(Enum.HumanoidStateType.Jumping) end
     end
 end)
 
--- Noclip (only affects local character parts once per step)
+-- Noclip
 RunService.Stepped:Connect(function()
     if _G.NoclipEnabled then
         local char = LocalPlayer.Character
         if char then
             for _, part in pairs(char:GetDescendants()) do
-                if part:IsA("BasePart") then
-                    pcall(function() part.CanCollide = false end)
-                end
+                if part:IsA("BasePart") then part.CanCollide=false end
             end
         end
     end
 end)
 
--- Player Dropdown + Refresh (keeps updated)
-local playerList = {}
-local function updatePlayerList()
-    playerList = {}
-    for _, plr in pairs(Players:GetPlayers()) do
-        if plr ~= LocalPlayer then
-            table.insert(playerList, plr.Name)
-        end
-    end
-end
-updatePlayerList()
+-- TP Buttons
+TP_Tab:Button({Title="Gun TP", Callback=teleportToGun})
+TP_Tab:Button({Title="Teleport to Murderer", Callback=function()
+    local m=getMurderer()
+    if m then teleportBehind(m) else WindUI:Notify({Title="Error",Content="No murderer detected",Duration=3,Icon="x"}) end
+end})
+TP_Tab:Button({Title="Teleport to Sheriff", Callback=function()
+    local s=getSheriff()
+    if s then teleportBehind(s) else WindUI:Notify({Title="Error",Content="No sheriff detected",Duration=3,Icon="x"}) end
+end})
 
-local selectedPlayer = nil
-local PlayerDropdown = TP_Tab:Dropdown({
-    Title = "Select Player",
-    Values = playerList,
-    Value = playerList[1],
-    Callback = function(option)
-        selectedPlayer = option
-    end
-})
+-- ESP Toggles
+ESP_Tab:Toggle({Title="Player ESP", Default=false, Callback=function(state) _G.ESPEnabled=state end})
+ESP_Tab:Toggle({Title="Gun ESP", Default=false, Callback=function(state) _G.GunESPEnabled=state end})
 
--- Buttons order: Gun TP (top), Teleport Murderer, Teleport Sheriff, (then Dropdown + Teleport to Player + Refresh)
-TP_Tab:Button({
-    Title = "Gun TP",
-    Callback = function() teleportToGun() end
-})
+-- Local Player
+Local_Tab:Slider({Title="WalkSpeed", Step=1, Value={Min=16,Max=100,Default=16}, Callback=function(val) _G.WalkSpeedValue=val setWalkSpeed() end})
+Local_Tab:Toggle({Title="Infinite Jump", Default=false, Callback=function(state) _G.InfiniteJumpEnabled=state end})
+Local_Tab:Toggle({Title="Noclip", Default=false, Callback=function(state) _G.NoclipEnabled=state end})
 
-TP_Tab:Button({
-    Title = "Teleport to Murderer",
-    Callback = function()
-        local m = getMurderer()
-        if m then
-            teleportBehind(m)
-        else
-            WindUI:Notify({Title="Murderer Not Found", Content="No murderer detected yet.", Duration=3, Icon="x"})
-        end
-    end
-})
-
-TP_Tab:Button({
-    Title = "Teleport to Sheriff",
-    Callback = function()
-        local s = getSheriff()
-        if s then
-            teleportBehind(s)
-        else
-            WindUI:Notify({Title="Sheriff Not Found", Content="No sheriff detected yet.", Duration=3, Icon="x"})
-        end
-    end
-})
-
-TP_Tab:Button({
-    Title = "Teleport to Player",
-    Callback = function()
-        if not selectedPlayer then
-            WindUI:Notify({Title="Teleport Failed", Content="No player selected.", Duration=3, Icon="x"})
-            return
-        end
-        local target = Players:FindFirstChild(selectedPlayer)
-        if target and target.Character and target.Character:FindFirstChild("HumanoidRootPart") then
-            local myHRP = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-            if myHRP then
-                pcall(function() myHRP.CFrame = target.Character.HumanoidRootPart.CFrame + Vector3.new(0,0,3) end)
-            end
-        else
-            WindUI:Notify({Title="Teleport Failed", Content="Player not found or dead.", Duration=3, Icon="x"})
-        end
-    end
-})
-
-TP_Tab:Button({
-    Title = "Refresh Player List",
-    Callback = function()
-        updatePlayerList()
-        pcall(function() PlayerDropdown:SetValues(playerList) end)
-        WindUI:Notify({Title="Player List Refreshed", Content="List updated successfully!", Duration=3, Icon="refresh-cw"})
-    end
-})
-
--- Render loop for ESP + GunESP
+-- ESP Render Loop
 RunService.RenderStepped:Connect(function()
-    -- player ESP
-    for player, data in pairs(ESP) do
-        pcall(function()
-            local char = player.Character
-            local hrp = char and char:FindFirstChild("HumanoidRootPart")
-            local hum = char and char:FindFirstChildOfClass("Humanoid")
-            local head = char and char:FindFirstChild("Head")
-            if not _G.ESPEnabled or not (char and hrp and hum and hum.Health > 0) or not head then
-                if data.Box then data.Box.Visible = false end
-                if data.Line then data.Line.Visible = false end
-                if data.NameTag then data.NameTag.Visible = false end
-                if data.Highlight then data.Highlight.Enabled = false end
-            else
-                local role = detectRole(player)
-                -- highlight
-                if data.Highlight then
-                    pcall(function() data.Highlight.FillColor = ROLE_COLORS[role] data.Highlight.Enabled = true end)
-                end
-                -- nameTag visibility (hide innocents)
-                local topPos = head.Position + Vector3.new(0,0.5,0)
-                local bottomPos = hrp.Position - Vector3.new(0,2.5,0)
-                local top2D, onTop = worldToScreen(topPos)
-                local bottom2D, onBottom = worldToScreen(bottomPos)
+    for player,data in pairs(ESP) do
+        local char = player.Character
+        local hrp = char and char:FindFirstChild("HumanoidRootPart")
+        local hum = char and char:FindFirstChildOfClass("Humanoid")
+        local head = char and char:FindFirstChild("Head")
+        if not _G.ESPEnabled or not (char and hrp and hum and hum.Health>0) then
+            if data.Box then data.Box.Visible=false end
+            if data.Line then data.Line.Visible=false end
+            if data.NameTag then data.NameTag.Visible=false end
+            if data.Highlight then data.Highlight.Enabled=false end
+        else
+            local role = detectRole(player)
+            if data.Highlight then data.Highlight.FillColor=ROLE_COLORS[role]; data.Highlight.Enabled=true end
+            if head and hrp then
+                local top2D, onTop = worldToScreen(head.Position+Vector3.new(0,0.5,0))
+                local bottom2D, onBottom = worldToScreen(hrp.Position-Vector3.new(0,2.5,0))
                 if onTop and onBottom then
-                    local height = math.abs(top2D.Y - bottom2D.Y)
-                    local width = height / 2
-                    if data.Box then
-                        data.Box.Position = Vector2.new(top2D.X - width/2, top2D.Y)
-                        data.Box.Size = Vector2.new(width, height)
-                        data.Box.Color = ROLE_COLORS[role]
-                        data.Box.Visible = true
-                    end
-                    if data.NameTag then
-                        data.NameTag.Position = top2D - Vector2.new(0,15)
-                        data.NameTag.Color = (role == "Innocent") and Color3.fromRGB(0,0,0) or ROLE_COLORS[role]
-                        data.NameTag.Visible = (role ~= "Innocent")
-                    end
-                    if data.Line then
-                        local root2D, rootOn = worldToScreen(hrp.Position)
-                        if rootOn then
-                            data.Line.From = Vector2.new(Camera.ViewportSize.X/2, 0)
-                            data.Line.To = root2D
-                            data.Line.Color = ROLE_COLORS[role]
-                            data.Line.Visible = true
-                        else
-                            data.Line.Visible = false
-                        end
-                    end
+                    local height=math.abs(top2D.Y-bottom2D.Y)
+                    local width=height/2
+                    if data.Box then data.Box.Position=Vector2.new(top2D.X-width/2,top2D.Y); data.Box.Size=Vector2.new(width,height); data.Box.Color=ROLE_COLORS[role]; data.Box.Visible=true end
+                    if data.NameTag then data.NameTag.Position=top2D-Vector2.new(0,15); data.NameTag.Color=(role=="Innocent") and Color3.fromRGB(0,0,0) or ROLE_COLORS[role]; data.NameTag.Visible=(role~="Innocent") end
+                    if data.Line then data.Line.From=Vector2.new(Camera.ViewportSize.X/2,0); data.Line.To=Vector2.new(top2D.X,top2D.Y); data.Line.Color=ROLE_COLORS[role]; data.Line.Visible=true end
                 else
-                    if data.Box then data.Box.Visible = false end
-                    if data.NameTag then data.NameTag.Visible = false end
-                    if data.Line then data.Line.Visible = false end
+                    if data.Box then data.Box.Visible=false end
+                    if data.NameTag then data.NameTag.Visible=false end
+                    if data.Line then data.Line.Visible=false end
                 end
             end
-        end)
+        end
     end
-
-    -- gun esp
-    if _G.GunESPEnabled and currentGun and currentGun:IsA("BasePart") then
-        pcall(function()
-            local pos, onScreen = Camera:WorldToViewportPoint(currentGun.Position)
-            if onScreen then
-                if gunBox then
-                    gunBox.Position = Vector2.new(pos.X - 12, pos.Y - 12)
-                    gunBox.Size = Vector2.new(24, 24)
-                    gunBox.Color = Color3.fromRGB(255, 255, 0)
-                    gunBox.Visible = true
-                end
-                if gunLine then
-                    gunLine.From = Vector2.new(Camera.ViewportSize.X/2, 0)
-                    gunLine.To = Vector2.new(pos.X, pos.Y)
-                    gunLine.Color = Color3.fromRGB(255, 255, 0)
-                    gunLine.Visible = true
-                end
-            else
-                if gunBox then gunBox.Visible = false end
-                if gunLine then gunLine.Visible = false end
-            end
-        end)
+    if _G.GunESPEnabled and currentGun then
+        local pos,onScreen=Camera:WorldToViewportPoint(currentGun.Position)
+        if onScreen then
+            if gunBox then gunBox.Position=Vector2.new(pos.X-12,pos.Y-12); gunBox.Size=Vector2.new(24,24); gunBox.Color=Color3.fromRGB(255,255,0); gunBox.Visible=true end
+            if gunLine then gunLine.From=Vector2.new(Camera.ViewportSize.X/2,0); gunLine.To=Vector2.new(pos.X,pos.Y); gunLine.Color=Color3.fromRGB(255,255,0); gunLine.Visible=true end
+        else
+            if gunBox then gunBox.Visible=false end
+            if gunLine then gunLine.Visible=false end
+        end
     else
-        if gunBox then gunBox.Visible = false end
-        if gunLine then gunLine.Visible = false end
+        if gunBox then gunBox.Visible=false end
+        if gunLine then gunLine.Visible=false end
     end
 end)
-
--- UI controls
-ESP_Tab:Toggle({Title="Player ESP", Default=false, Callback=function(state) _G.ESPEnabled = state end})
-ESP_Tab:Toggle({Title="Gun ESP", Default=false, Callback=function(state) _G.GunESPEnabled = state end})
-
-Local_Tab:Slider({
-    Title = "WalkSpeed",
-    Step = 1,
-    Value = { Min = 16, Max = 100, Default = 16 },
-    Callback = function(val)
-        _G.WalkSpeedValue = val
-        setWalkSpeed()
-    end
-})
-
-Local_Tab:Toggle({Title="Infinite Jump", Default=false, Callback=function(state) _G.InfiniteJumpEnabled = state end})
-Local_Tab:Toggle({Title="Noclip", Default=false, Callback=function(state) _G.NoclipEnabled = state end})
-
-local Players = game:GetService("Players")
-local Dropdown = TP_Tab
-
-local function Update()
-    local t = {}
-    for _,p in next, Players:GetPlayers() do
-        table.insert(t,p.Name)
-    end
-    Dropdown:Refresh(t)
-end
-
-Players.PlayerAdded:Connect(Update)
-Players.PlayerRemoving:Connect(Update)
-Update()
--- finalize: ensure local player esp not created
-destroyPlayerESP(LocalPlayer)
