@@ -28,7 +28,7 @@ Window:EditOpenButton({
     Draggable = true
 })
 
-local Info_Tab = Window:Tab({ Title = "Info", Icon = "info" })
+local InfoTab = Window:Tab({ Title = "Info", Icon = "info" })
 local ESP_Tab = Window:Tab({ Title = "ESP", Icon = "app-window" })
 local TP_Tab  = Window:Tab({ Title = "TP", Icon = "zap" })
 local Local_Tab = Window:Tab({ Title = "Local Player", Icon = "user" })
