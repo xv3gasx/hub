@@ -44,19 +44,18 @@ InfoTab:Section({
 InfoTab:Divider()
 
 local Owner = InfoTab:Paragraph({
-    Title = "CÃ¡o Mod",
-    Desc = "Helped for script",
-    Image = "rbxassetid://113523692909987",
+    Title = "v3gas",
+    Desc = "Owner of the script",
+    Image = "https://cdn.discordapp.com/attachments/1333321395291160606/1423986592523092008/new_logo.jpg?ex=68e24e5c&is=68e0fcdc&hm=6aef019e9877c32cf5495931f2e174357982d40b788f8a2efad591cffee2a9b8&",
     ImageSize = 30,
     Thumbnail = "",
     ThumbnailSize = 0,
     Locked = false,
 })
-
 local Owner = InfoTab:Paragraph({
-    Title = "v3gas",
-    Desc = "Owner of the script",
-    Image = "https://cdn.discordapp.com/attachments/1333321395291160606/1423986592523092008/new_logo.jpg?ex=68e24e5c&is=68e0fcdc&hm=6aef019e9877c32cf5495931f2e174357982d40b788f8a2efad591cffee2a9b8&",
+    Title = "CÃ¡o Mod",
+    Desc = "Helped for script",
+    Image = "rbxassetid://113523692909987",
     ImageSize = 30,
     Thumbnail = "",
     ThumbnailSize = 0,
@@ -71,7 +70,7 @@ InfoTab:Section({
 })
 InfoTab:Divider()
 
-local InviteCode = "mSrMzVuc3h"
+local InviteCode = "2AzTHFhkGd"
 local DiscordAPI = "https://discord.com/api/v10/invites/" .. InviteCode .. "?with_counts=true&with_expiration=true"
 
 local function LoadDiscordInfo()
