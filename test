@@ -37,7 +37,7 @@ local HttpService = game:GetService("HttpService")
 
 InfoTab:Divider()
 InfoTab:Section({ 
-    Title = "Developer",
+    Title = "Developers",
     TextXAlignment = "Center",
     TextSize = 17,
 })
@@ -45,7 +45,7 @@ InfoTab:Divider()
 
 local Owner = InfoTab:Paragraph({
     Title = "CÃ¡o Mod",
-    Desc = "Dex and owner script",
+    Desc = "Helped for script",
     Image = "rbxassetid://113523692909987",
     ImageSize = 30,
     Thumbnail = "",
@@ -53,18 +53,10 @@ local Owner = InfoTab:Paragraph({
     Locked = false,
 })
 
-InfoTab:Divider()
-InfoTab:Section({ 
-    Title = "Source - Most of the script is based on his script",
-    TextXAlignment = "Center",
-    TextSize = 17,
-})
-InfoTab:Divider()
-
-local Source = InfoTab:Paragraph({
-    Title = "Nova Hoang (Nguyá»…n NgÃ´ Táº¥n HoÃ ng)",
-    Desc = "Owner Of Article Hub and Nihahaha Hub ",
-    Image = "rbxassetid://77933782593847",
+local Owner = InfoTab:Paragraph({
+    Title = "v3gas",
+    Desc = "Owner of the script",
+    Image = "https://cdn.discordapp.com/attachments/1333321395291160606/1423986592523092008/new_logo.jpg?ex=68e24e5c&is=68e0fcdc&hm=6aef019e9877c32cf5495931f2e174357982d40b788f8a2efad591cffee2a9b8&",
     ImageSize = 30,
     Thumbnail = "",
     ThumbnailSize = 0,
