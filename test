@@ -316,7 +316,6 @@ Local_Tab:Slider({Title="WalkSpeed", Step=1, Value={Min=16,Max=100,Default=16}, 
 Local_Tab:Toggle({Title="Infinite Jump", Default=false, Callback=function(state) _G.InfiniteJumpEnabled=state end})
 Local_Tab:Toggle({Title="Noclip", Default=false, Callback=function(state) _G.NoclipEnabled=state end})
 
--- ESP Render Loop
 RunService.RenderStepped:Connect(function()
     for player,data in pairs(ESP) do
         local char = player.Character
@@ -374,7 +373,7 @@ RunService.RenderStepped:Connect(function()
             screenVec = select(2, Camera:WorldToViewportPoint(currentGun.Position))
             visible = select(3, Camera:WorldToViewportPoint(currentGun.Position))
         end
-        -- fallback simpler approach
+        
         local vec, vis = Camera:WorldToViewportPoint((currentGun.Position or (currentGun.PrimaryPart and currentGun.PrimaryPart.Position) or Vector3.new()))
         if vis then
             if gunBox then gunBox.Position=Vector2.new(vec.X-12,vec.Y-12); gunBox.Size=Vector2.new(24,24); gunBox.Color=Color3.fromRGB(255,255,0); gunBox.Visible=true end
@@ -389,7 +388,6 @@ RunService.RenderStepped:Connect(function()
     end
 end)
 
--- Aim toggle in Aim_Tab
 Main_Tab:Toggle({
     Title = "Kill Murderer(need a gun)",
     Default = false,
@@ -429,22 +427,12 @@ Main_Tab:Toggle({
     end
 })
 
--- (Mevcut scriptin tamamı buraya gelecek, hiçbir şeyi değiştirmiyoruz)
-
--- (Mevcut scriptin sonu)
-
--- -------------------------
--- Advanced Aim System entegrasyonu (ekleme)
--- -------------------------
-
--- Config
 local AimConfig = {
     Murderer = false,
     Sheriff = false,
     FOV = 150
 }
 
--- FOV Circle
 local Camera = workspace.CurrentCamera
 local LocalPlayer = game:GetService("Players").LocalPlayer
 local RunService = game:GetService("RunService")
@@ -460,7 +448,6 @@ RunService.RenderStepped:Connect(function()
     fovCircle.Position = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y / 2)
 end)
 
--- Wall check
 local function isVisible(targetPart)
     local origin = Camera.CFrame.Position
     local direction = (targetPart.Position - origin)
@@ -473,7 +460,6 @@ local function isVisible(targetPart)
     return rayResult.Instance:IsDescendantOf(targetPart.Parent)
 end
 
--- Get closest
 local function getClosest(roleName)
     local closest, minDist = nil, math.huge
     for _, p in pairs(game:GetService("Players"):GetPlayers()) do
@@ -496,7 +482,6 @@ local function getClosest(roleName)
     return closest
 end
 
--- Aim toggles entegre edilmiş Main_Tab içine
 Main_Tab:Toggle({
     Title = "Aim at Murderer",
     Default = false,
@@ -533,7 +518,6 @@ Main_Tab:Toggle({
     end
 })
 
--- Aim loop
 RunService.RenderStepped:Connect(function()
     if not (AimConfig.Murderer or AimConfig.Sheriff) then 
         fovCircle.Visible = false 
