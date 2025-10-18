@@ -39,6 +39,9 @@ local ESP_Tab = Window:Tab({Title="Highlight", Icon="eye"})
 ESP_Tab:Toggle({Title="Enable Highlight", Default=false, Callback=function(s)
     _G.HighlightESP = s
 end})
+ESP_Tab:Toggle({Title="Enable Box ESP", Default=false, Callback=function(s)
+    _G.BoxESP = s
+end})
 
 --// 7. Globals
 local ROLE_COLORS = {
