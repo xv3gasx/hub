@@ -1,4 +1,4 @@
---// WindUI yükleme
+--// 1. WindUI Loader
 local ok, WindUI = pcall(function()
     return loadstring(game:HttpGet("https://github.com/Footagesus/WindUI/releases/latest/download/main.lua"))()
 end)
@@ -6,28 +6,50 @@ if not ok or not WindUI then return warn("WindUI yüklenemedi!") end
 
 WindUI:Notify({Title="Highlight ESP", Content="Yüklendi!", Duration=3, Icon="check"})
 
---// Servisler
-local Players = game:GetService("Players")
-ocal RunService = game:GetService("RunService")
-local Camera = workspace.CurrentCamera
-local LocalPlayer = Players.LocalPlayer
+--// 2. UI Window
+local Window = WindUI:CreateWindow({
+    Title = "Highlight ESP",
+    Author = "x.v3gas.x",
+    Theme = "Dark",
+    Size = UDim2.fromOffset(300,200)
+})
 
---// Renkler
+--// 3. Edit Open Button
+Window:EditOpenButton({
+    Title = "Open Highlight ESP",
+    Icon = "eye",
+    CornerRadius = UDim.new(0,16),
+    StrokeThickness = 2,
+    Color = ColorSequence.new(Color3.fromHex("FF0F7B"), Color3.fromHex("F89B29")),
+    OnlyMobile = false,
+    Enabled = true,
+    Draggable = true
+})
+
+--// 4. Services
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local RunService = game:GetService("RunService")
+local Camera = workspace.CurrentCamera
+
+--// 5. Tabs
+local ESP_Tab = Window:Tab({Title="Highlight", Icon="eye"})
+
+--// 6. Toggles/Buttons
+ESP_Tab:Toggle({Title="Enable Highlight", Default=false, Callback=function(s)
+    _G.HighlightESP = s
+end})
+
+--// 7. Globals
 local ROLE_COLORS = {
     Murderer = Color3.fromRGB(255,0,0),
     Sheriff  = Color3.fromRGB(0,150,255),
     Innocent = Color3.fromRGB(0,255,0)
 }
-
---// UI Penceresi
-local Window = WindUI:CreateWindow({Title="Highlight ESP", Author="x.v3gas.x", Theme="Dark", Size=UDim2.fromOffset(300,200)})
-local Tab = Window:Tab({Title="Highlight", Icon="eye"})
-
---// Toggle
 _G.HighlightESP = false
-Tab:Toggle({Title="Enable Highlight", Default=false, Callback=function(s) _G.HighlightESP=s end})
+_G.BoxESP = false
 
---// ESP Tablosu
+--// Functions
 local ESP = {}
 
 local function detectRole(player)
@@ -50,39 +72,41 @@ local function detectRole(player)
 end
 
 local function createESP(player)
-    if player==LocalPlayer or ESP[player] then return end
+    if player == LocalPlayer or ESP[player] then return end
+
     local highlight = Instance.new("Highlight")
     highlight.FillTransparency = 0
     highlight.OutlineTransparency = 0.5
     highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
     highlight.Enabled = false
-    ESP[player] = {Highlight=highlight}
+
+    ESP[player] = {Highlight = highlight}
 
     player.CharacterAdded:Connect(function(char)
         task.wait(0.3)
         highlight.Parent = char
         highlight.Adornee = char
     end)
+
     if player.Character then
         highlight.Parent = player.Character
         highlight.Adornee = player.Character
     end
 end
 
-for _,p in pairs(Players:GetPlayers()) do createESP(p) end
+for _, p in pairs(Players:GetPlayers()) do createESP(p) end
 Players.PlayerAdded:Connect(createESP)
 Players.PlayerRemoving:Connect(function(p)
     local d = ESP[p]
     if d then pcall(function() d.Highlight:Destroy() end) end
-    ESP[p]=nil
+    ESP[p] = nil
 end)
 
 --// Render Loop
-game:GetService("RunService").RenderStepped:Connect(function()
+RunService.RenderStepped:Connect(function()
     for player, data in pairs(ESP) do
         local char = player.Character
-        local role = detectRole(player)
-        local color = ROLE_COLORS[role]
+        local color = ROLE_COLORS[detectRole(player)]
         if _G.HighlightESP and char then
             data.Highlight.Enabled = true
             data.Highlight.FillColor = color
@@ -93,28 +117,19 @@ game:GetService("RunService").RenderStepped:Connect(function()
     end
 end)
 
--- Box
-local function safeNewDrawing(class, props)
-    local obj = Drawing.new(class)
-    for i,v in pairs(props or {}) do obj[i]=v end
-    return obj
-end
-
-local function worldToScreen(pos)
-    local vec, vis = Camera:WorldToViewportPoint(pos)
-    return Vector2.new(vec.X, vec.Y), vis
-end
+--// Box
+local ESP = {}
 
 local function detectRole(player)
-    local role="Innocent"
-    local bp=player:FindFirstChild("Backpack")
+    local role = "Innocent"
+    local bp = player:FindFirstChild("Backpack")
     if bp then
         if bp:FindFirstChild("Knife") then role="Murderer"
         elseif bp:FindFirstChild("Gun") then role="Sheriff" end
     end
-    local char=player.Character
+    local char = player.Character
     if char then
-        for _,tool in pairs(char:GetChildren()) do
+        for _, tool in pairs(char:GetChildren()) do
             if tool:IsA("Tool") then
                 if tool.Name=="Knife" then role="Murderer"
                 elseif tool.Name=="Gun" then role="Sheriff" end
@@ -124,54 +139,62 @@ local function detectRole(player)
     return role
 end
 
-local ESP = {}
+local function worldToScreen(pos)
+    local vec, vis = Camera:WorldToViewportPoint(pos)
+    return Vector2.new(vec.X, vec.Y), vis
+end
+
 local function createESP(player)
-    if player==LocalPlayer or ESP[player] then return end
-    local box = safeNewDrawing("Square",{Thickness=1,Filled=false,Visible=false})
-    ESP[player]={Box=box}
+    if player == LocalPlayer or ESP[player] then return end
+
+    local box = Drawing.new("Square")
+    box.Thickness = 2
+    box.Filled = false
+    box.Visible = false
+
+    ESP[player] = {Box = box}
 
     player.CharacterAdded:Connect(function(char)
         task.wait(0.3)
     end)
 end
 
-for _,p in pairs(Players:GetPlayers()) do createESP(p) end
+for _, p in pairs(Players:GetPlayers()) do createESP(p) end
 Players.PlayerAdded:Connect(createESP)
 Players.PlayerRemoving:Connect(function(p)
-    local d=ESP[p]
+    local d = ESP[p]
     if d then pcall(function() d.Box:Remove() end) end
-    ESP[p]=nil
+    ESP[p] = nil
 end)
 
---// Render
+--// Render Loop
 RunService.RenderStepped:Connect(function()
     for player, data in pairs(ESP) do
         local char = player.Character
-        if not char or not char:FindFirstChild("HumanoidRootPart") then
+        if not char or not char:FindFirstChild("HumanoidRootPart") or not char:FindFirstChild("Head") then
             data.Box.Visible = false
             continue
         end
 
         local hrp = char.HumanoidRootPart
-        local head = char:FindFirstChild("Head")
-        local humanoid = char:FindFirstChildOfClass("Humanoid")
-        if not head or not humanoid then data.Box.Visible=false continue end
+        local head = char.Head
+        local topPos, topVis = worldToScreen(head.Position + Vector3.new(0,0.5,0))
+        local bottomPos, bottomVis = worldToScreen(hrp.Position - Vector3.new(0,2.5,0))
 
-        local pos, vis = worldToScreen(hrp.Position)
-        if not vis then data.Box.Visible=false continue end
+        if not topVis or not bottomVis then
+            data.Box.Visible = false
+            continue
+        end
 
-        local headPos, feetPos = worldToScreen(head.Position + Vector3.new(0,0.3,0)), worldToScreen(hrp.Position - Vector3.new(0,2.5,0))
-        local height = math.abs(headPos.Y - feetPos.Y)
+        local height = math.abs(topPos.Y - bottomPos.Y)
         local width = height / 2.3
-        local size = Vector2.new(width*1.1, height*1.1)
-        local topLeft = Vector2.new(headPos.X - size.X/2, headPos.Y)
-        local color = ROLE_COLORS[detectRole(player)]
+        local topLeft = Vector2.new(topPos.X - width/2, topPos.Y)
 
         if _G.BoxESP then
             data.Box.Visible = true
             data.Box.Position = topLeft
-            data.Box.Size = size
-            data.Box.Color = color:lerp(Color3.new(0,0,0),0.25)
+            data.Box.Size = Vector2.new(width, height)
+            data.Box.Color = ROLE_COLORS[detectRole(player)]:lerp(Color3.new(0,0,0),0.2)
         else
             data.Box.Visible = false
         end
